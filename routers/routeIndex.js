@@ -7,9 +7,9 @@ const questions = require('./questions');
 
 const auth = require('./auth');
 // config
-router.use("/questions",questions)
+router.use("/questions", questions)
 
-router.use("/auth",auth)
+router.use("/auth", auth)
 
 
 module.exports = router;

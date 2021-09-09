@@ -1,23 +1,59 @@
-// library import
+// Library import
 const express = require('express');
 
+const path = require('path');
+
 const dotenv = require('dotenv');
-// environment variables config
+// Environment variables config
 dotenv.config({
     path: "./config/env/globalConfig.env"
 });
-// express instance
+// Express instance
 const app = express();
-// server variable
-const HOST = process.env.HOST;
-
-const PORT = process.env.PORT;
-
-const NODE_ENV = process.env.NODE_ENV;
-//router
+// Server variable
+const { TITLE,HOST,PORT,NODE_ENV,VERSION,AUTHOR,LICENSE } = process.env
+// Router
 const routers = require('./routers/routeIndex');
 //// Server config
-// Router middleware
-app.use('/api/',routers);
+const database = require('./helpers/database/connectDatabase');
+// Custom Error Handler
+const customErrorHandler = require('./middlewares/errors/customErrorHandler');
 
-app.listen(PORT,HOST,()=>console.log(`App running http://${HOST}:${PORT} : ${NODE_ENV}`));
+class App {
+
+    constructor() {
+
+        database.connect();
+
+        app
+            .locals.title = TITLE;
+
+        if (NODE_ENV === "development") {
+            
+            const Start = {
+                "name": TITLE,
+                "version": VERSION,
+                "author": AUTHOR,
+                "license": LICENSE,
+                "NODE_ENV":NODE_ENV
+            }
+            app
+                .get("/", function (req, res) {
+                    res.status(200).json(Start)
+                })
+            console.log(Start);
+        }else{
+            console.log(NODE_ENV);
+        }
+
+        app
+            .use(express.static(path.join(__dirname,"public")))
+            .use(express.json())
+            .use('/api/', routers)
+            .use(customErrorHandler)
+            .listen(PORT, HOST, () => console.log(`App running http://${HOST}:${PORT} : ${NODE_ENV}`));
+    }
+
+}
+
+const init = new App();

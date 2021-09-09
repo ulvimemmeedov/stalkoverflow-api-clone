@@ -1,18 +1,10 @@
 // Library import
 const express = require('express');
+// Controller import
+const QuestionsController = require('../controllers/questions');
 // Router instance
 const router = express.Router();
 //Questions routers
-router.get('/',function (req,res) {
-
-    res.send('Questions home page')
-
-});
-
-router.get('/delete',function (req,res) {
-
-    res.send('delete Questions page')
-
-});
+router.get('/',QuestionsController.getAllQuestions);
 
 module.exports = router;
