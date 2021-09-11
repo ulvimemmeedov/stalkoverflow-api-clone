@@ -76,7 +76,43 @@ class AuthController {
         });
 
     });
-    upload = asyncErrorWrapper (async (req,res,next) =>{
+    upload = asyncErrorWrapper(async (req, res, next) => {
+
+        if (!req.savedFile) {
+            return next(new CustomError("file not found",400))
+        }
+
+        const user = await UserSchema.findByIdAndUpdate({ _id: req.user.id }, {
+            "profile_image": req.savedFile
+        }, {
+            new: true,
+            runValidators: true
+        });
+
+        res.status(200).json({
+            success: true,
+            data: user,
+            message: "image upload successfull"
+        })
+
+    });
+    forgotPassword = asyncErrorWrapper(async (req, res, next) => {
+
+        const resetEmail = req.body.email;
+
+        const user =  await UserSchema.findOne({email:resetEmail});
+
+        if (!user){
+            return next(new CustomError("There is no user with that email",400));
+        }
+        const resetPasswordToken = await user.getResetPasswordTokenFromUser();
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "token send your email"
+        })
 
     });
 }

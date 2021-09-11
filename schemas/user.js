@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 
 const bcrypt = require('bcryptjs');
 
+const crypto = require('crypto');
+
 const jwt = require("jsonwebtoken");
 // Constants
 const Schema = mongoose.Schema;
@@ -85,9 +87,29 @@ UserSchema.methods.generateJwtFromUser = function () {
 
     return token;
 }
+// Password reset
+UserSchema.methods.getResetPasswordTokenFromUser = function () {
+    
+    const {RESET_PASSWORD_EXPIRE} = process.env
+
+    const randomHexString = crypto.randomBytes(15).toString("hex");
+
+    const resetPasswordToken = crypto
+    .createHash('SHA256')
+    .update(randomHexString)
+    .digest('hex');
+    
+    this.resetPasswordToken = resetPasswordToken;
+    
+    this.resetPasswordExpire = Date.now() + parseInt(RESET_PASSWORD_EXPIRE);
+
+    return resetPasswordToken;
+}
 // Pre hooks
 UserSchema.pre("save",function(next){
-    
+    if (!this.isModified("password")) {
+        next();
+    }
     bcrypt.genSalt(10, (err,salt)=>{
         
         if (err) return next(err);

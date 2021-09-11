@@ -49,6 +49,7 @@ class App {
         app
             .use(express.static(path.join(__dirname,"public")))
             .use(express.json())
+            .use(express.urlencoded({ extended: true }))
             .use('/api/', routers)
             .use(customErrorHandler)
             .listen(PORT, HOST, () => console.log(`App running http://${HOST}:${PORT} : ${NODE_ENV}`));
